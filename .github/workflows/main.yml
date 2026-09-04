@@ -11,16 +11,22 @@ jobs:
     runs-on: windows-latest
     steps:
     - uses: actions/checkout@v4
+
     - name: Setup .NET
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: '9.0.x'
+
     - name: Restore
-      run: dotnet restore
+      run: |
+        dotnet restore Backend/Backend.csproj
+        dotnet restore Agent/Agent.csproj
+
     - name: Build Backend
-      run: dotnet build Backend/Backend.csproj --configuration Release
+      run: dotnet build Backend/Backend.csproj --configuration Release --no-restore
+
     - name: Build Agent
-      run: dotnet build Agent/Agent.csproj --configuration Release
+      run: dotnet build Agent/Agent.csproj --configuration Release --no-restore
 
   build-frontend:
     runs-on: ubuntu-latest
