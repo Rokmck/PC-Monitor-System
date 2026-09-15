@@ -14,7 +14,7 @@ computer.Open();
 var http = new HttpClient();
 
 Console.WriteLine(">>> Agentas (v2) paleistas.");
-Console.WriteLine(">>> Renku duomenis: CPU, GPU, RAM ir Temperatūras...");
+Console.WriteLine(">>> Renku duomenis: CPU, GPU, RAM ir Temperatūras..."); // del kompo savybiu cpu nesurenka cpu temperaturos ir tt..
 
 while (true) {
     float cpuL = 0, cpuT = 0, gpuL = 0, gpuT = 0, ram = 0;
@@ -67,5 +67,5 @@ while (true) {
         Console.WriteLine("Klaida: Serveris nepasiekiamas."); 
     }
 
-    await Task.Delay(2000);
+    await Task.Delay(120000); // 2 min
 }
