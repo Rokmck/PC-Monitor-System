@@ -67,3 +67,6 @@ app.MapGet("/data", async (MyDb db) => {
 });
 
 app.Run("http://localhost:5000");
+
+
+// last update 2026-09-15
