@@ -1,0 +1,6 @@
+[2026-09-22 15:11:41][RAM] [Warning] Check ram usage - 74.55%
+[2026-09-22 15:11:41][GPU] [Warning] Check gpu usage - 3.20%
+[2026-09-22 15:13:42][RAM] [Warning] Check ram usage - 77.72%
+[2026-09-22 15:13:42][GPU] [Warning] Check gpu usage - 3.20%
+[2026-09-22 15:15:44][RAM] [Warning] Check ram usage - 79.12%
+[2026-09-22 15:15:44][GPU] [Warning] Check gpu usage - 3.20%

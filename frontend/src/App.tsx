@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react';
 import ReactECharts from 'echarts-for-react';
 import { Activity, Cpu, Database, Zap, Bell, ShieldAlert } from 'lucide-react';
 
-// 1. Duomenų struktūros (TypeScript)
+// 1. Data structure (TypeScript)
 interface Metric {
   id: number;
   time: string;
@@ -33,13 +33,13 @@ export default function App() {
   const [alerts, setAlerts] = useState<AlertLog[]>([]);
   const [status, setStatus] = useState<'online' | 'offline'>('offline');
 
-  // 2. Duomenų sinchronizacija su Backend
+  // 2. Data synchronization via backend
   useEffect(() => {
     let isMounted = true;
 
     const fetchAll = async () => {
       try {
-        // Traukiame metrikas ir alertus vienu metu
+        // fetch metrics and alerts at the same time
         const [resData, resAlerts] = await Promise.all([
           fetch('http://localhost:5000/data'),
           fetch('http://localhost:5000/alerts')
@@ -62,7 +62,7 @@ export default function App() {
     };
 
     fetchAll();
-    const interval = setInterval(fetchAll, 20000); // Atnaujiname kas 20 sekundes
+    const interval = setInterval(fetchAll, 20000); // Update every 20 sec.
 
     return () => {
       isMounted = false;
@@ -72,7 +72,7 @@ export default function App() {
 
   const last = data[data.length - 1] || { cpuLoad: 0, cpuTemp: 0, gpuLoad: 0, gpuTemp: 0, ramUsage: 0 };
 
-  // 3. Grafiko konfigūracija
+  // 3. Graph configuration
   const chartOption = {
     backgroundColor: 'transparent',
     tooltip: { trigger: 'axis', backgroundColor: '#161b22', borderWidth: 0, textStyle: { color: '#fff' } },
@@ -108,7 +108,7 @@ export default function App() {
           </div>
         </header>
 
-        {/* METRIKŲ KORTELĖS */}
+        {/* Metrics cards */}
         <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-10">
           <StatCard title="Processor (CPU)" usage={last.cpuLoad} temp={last.cpuTemp} icon={<Cpu size={20} className="text-blue-500" />} />
           <StatCard title="Graphics (GPU)" usage={last.gpuLoad} temp={last.gpuTemp} icon={<Zap size={20} className="text-purple-500" />} />
@@ -125,7 +125,7 @@ export default function App() {
           </div>
         </div>
 
-        {/* GRAFIKAS */}
+        {/* Graph */}
         <div className="bg-[#161b22] border border-[#30363d] p-8 rounded-3xl shadow-2xl mb-10">
           <div className="flex items-center gap-2 mb-8 border-b border-[#30363d] pb-4">
             <Activity size={18} className="text-blue-500" />
@@ -134,7 +134,7 @@ export default function App() {
           <ReactECharts option={chartOption} style={{ height: '350px' }} notMerge={true} />
         </div>
 
-        {/* ALERTŲ LENTELĖ (Nauja!) */}
+        {/* alert dashboard */}
         <div className="bg-[#161b22] border border-[#30363d] rounded-3xl shadow-2xl overflow-hidden">
           <div className="p-6 border-b border-[#30363d] flex items-center gap-3">
             <Bell size={18} className="text-yellow-500" />
@@ -180,7 +180,7 @@ export default function App() {
   );
 }
 
-// Pagalbinis komponentas kortelėms
+// Pagalbinė komponentė, rodanti atskirą statistikos kortelę
 function StatCard({ title, usage, temp, icon }: StatCardProps) {
   const isHot = temp > 10;
 

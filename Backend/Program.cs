@@ -3,46 +3,51 @@ using Microsoft.EntityFrameworkCore;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// 1. Konfigūruojame CORS ir DB
+// 1. Making configurations for CORS and DB
 builder.Services.AddCors(opt => opt.AddPolicy("AllowAll", p => p.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader()));
 builder.Services.AddDbContext<MyDb>(opt => opt.UseSqlite("Data Source=monitorius.db"));
 
 var app = builder.Build();
 app.UseCors("AllowAll");
 
-// DB sukūrimas
+// creating DB
 using (var scope = app.Services.CreateScope()) {
     scope.ServiceProvider.GetRequiredService<MyDb>().Database.EnsureCreated();
 }
 
-// ---------------------------------------------------------
-// 2. DUOMENŲ PRIĖMIMAS IR ALERTŲ TIKRINIMAS
+// 2. Data geting and alert authentification
 // ---------------------------------------------------------
 app.MapPost("/save", async (Metric m, MyDb db) => {
     db.Metrics.Add(m);
 
-    // ČIA PRIDĖTA: Alertų tikrinimo logika
-    // Jei CPU temperatūra viršija 10 laipsnių
+    void AddAlert(AlertLog alert)
+    {
+        db.Alerts.Add(alert);
+        var logMessage = $"[{alert.Time:yyyy-MM-dd HH:mm:ss}][{alert.Component}] [{alert.Status}] {alert.Message}";
+        File.AppendAllText("logs.txt", logMessage + Environment.NewLine);
+    }
+
+    // Alert auth. logic
     if (m.CpuTemp > 1) {
-        db.Alerts.Add(new AlertLog { 
+        AddAlert(new AlertLog { 
             Component = "CPU", 
             Status = "Critical", 
             Message = $"Kritinė temperatūra: {m.CpuTemp:0}°C!" 
         });
     }
 
-    // Jei RAM užpildytas daugiau nei 10%
+    // ram usage check logic
     if (m.RamUsage > 1) {
-        db.Alerts.Add(new AlertLog { 
+        AddAlert(new AlertLog { 
             Component = "RAM", 
             Status = "Warning", 
             Message = "Check ram usage - " + m.RamUsage.ToString("0.00") + "%"
         });
     }
 
-    // Jei GPU apkrova viršija 1%
+    // gpu usage check logic
     if (m.GpuLoad > 1) {
-        db.Alerts.Add(new AlertLog { 
+        AddAlert(new AlertLog { 
             Component = "GPU", 
             Status = "Warning", 
             Message = "Check gpu usage - " + m.GpuLoad.ToString("0.00") + "%" 
@@ -53,15 +58,14 @@ app.MapPost("/save", async (Metric m, MyDb db) => {
     return Results.Ok();
 });
 
-// ---------------------------------------------------------
-// 3. ALERTŲ ATIDAVIMAS FRONTENDUI
-// ---------------------------------------------------------
+// 3. Alert displaying on client side
+// -------------------------------
 app.MapGet("/alerts", async (MyDb db) => {
-    // Grąžiname paskutinius 10 įspėjimų
+   // update the newest alert for each component
     return await db.Alerts.GroupBy(x => x.Component).Select(g => g.OrderByDescending(x => x.Id).First()).ToListAsync();
 });
 
-// Esamas metrikų gavimas
+// present metrics geting
 app.MapGet("/data", async (MyDb db) => {
     return await db.Metrics.OrderByDescending(x => x.Id).Take(25).ToListAsync();
 });
