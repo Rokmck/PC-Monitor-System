@@ -1,5 +1,6 @@
 using Backend;
 using Microsoft.EntityFrameworkCore;
+using System.Net.NetworkInformation;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,9 @@ using (var scope = app.Services.CreateScope()) {
 // ---------------------------------------------------------
 app.MapPost("/save", async (Metric m, MyDb db) => {
     db.Metrics.Add(m);
+    using var ping = new Ping();
+    var reply = await ping.SendPingAsync("8.8.8.8");
+    var pingM = reply.Status == IPStatus.Success ? reply.RoundtripTime : -1;
 
     void AddAlert(AlertLog alert)
     {
@@ -42,6 +46,22 @@ app.MapPost("/save", async (Metric m, MyDb db) => {
             Component = "RAM", 
             Status = "Warning", 
             Message = "Check ram usage - " + m.RamUsage.ToString("0.00") + "%"
+        });
+    }
+    if (pingM >= 180)
+    {
+        AddAlert(new AlertLog { 
+            Component = "Network", 
+            Status = "Critical", 
+            Message = "Check network ping - " + pingM.ToString("0.00") + "ms" 
+        });
+    }
+    else if (pingM >= 90)
+    {
+        AddAlert(new AlertLog { 
+            Component = "Network", 
+            Status = "Warning", 
+            Message = "Check network ping - " + pingM.ToString("0") + "ms" 
         });
     }
 
@@ -73,4 +93,4 @@ app.MapGet("/data", async (MyDb db) => {
 app.Run("http://localhost:5000");
 
 
-// last update 2026-09-22
+// last update 2026-09-24

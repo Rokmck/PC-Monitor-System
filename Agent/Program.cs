@@ -27,7 +27,7 @@ while (true) {
                 if (s.SensorType == SensorType.Load) cpuL = s.Value ?? 0;
                 
                 if (s.SensorType == SensorType.Temperature) {
-                    // Išspausdinam viską, ką randam, kad žinotume vardus
+                    // Printing everything what we can find about CPU temperature sensors
                     Console.WriteLine($"[CPU TEMP] Rastas jutiklis: {s.Name} = {s.Value}°C");
                     
                     // Bandom pagauti pagrindinę temperatūrą
@@ -50,8 +50,6 @@ while (true) {
                 ram = s.Value ?? 0;
         }
     }
-
-    // SVARBU: Patikrink, ar šie pavadinimai (kairėje) sutampa su tavo Backend Models.cs laukais!
     var payload = new { 
         CpuLoad = cpuL, 
         CpuTemp = cpuT, 
@@ -59,7 +57,6 @@ while (true) {
         GpuTemp = gpuT, 
         RamUsage = ram 
     };
-
     try {
         await http.PostAsJsonAsync("http://localhost:5000/save", payload);
         Console.WriteLine($"[SIUNČIAMA] CPU: {cpuL:0}% | Temp: {cpuT:0}°C | GPU: {gpuL:0}%");
@@ -71,4 +68,4 @@ while (true) {
 }
 
 
-// last update 2026-09-22
+// last update 2026-09-24
